@@ -17,7 +17,7 @@ Visit our [demo page](https://aaronz345.github.io/TCSingerDemo/) for audio sampl
 ## News
 - 2024.12: We released the checkpoints of TCSinger!
 - 2024.11: We released the code of TCSinger!
-- 2024.09: We released the full dataset of [GTSinger](https://github.com/GTSinger)!
+- 2024.09: We released the full dataset of [GTSinger](https://github.com/AaronZ345/GTSinger)!
 - 2024.09: TCSinger is accepted by EMNLP 2024!
 
 ## Key Features
