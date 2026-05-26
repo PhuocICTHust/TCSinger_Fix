@@ -338,10 +338,22 @@ class SingingBinarizer(BaseBinarizer):
     
 # technique f0 midi spk mel style
 class TCBinarizer(SingingBinarizer):
-    ph_encoder = build_token_encoder(os.path.join(hparams["processed_data_dir"], "phone_set.json"))
-    spker_map = json.load(open(os.path.join(hparams["processed_data_dir"], "spker_set.json")))
+    ph_encoder = build_token_encoder(r"E:\TCSinger\data\processed\tc\phone_set.json")
+    spker_map = json.load(open(r"E:\TCSinger\data\processed\tc\spker_set.json", encoding='utf-8'))
     @classmethod
     def process_item(cls, item, binarization_args):
+        hparams['fft_size'] = 1024
+        hparams['hop_size'] = 256
+        hparams['win_size'] = 1024
+        hparams['fmin'] = 20
+        hparams['fmax'] = 24000
+        hparams['audio_sample_rate'] = 48000
+        hparams['audio_num_mel_bins'] = 80
+        hparams['loud_norm'] = False
+        hparams['f0_min'] = 50
+        hparams['f0_max'] = 1000
+        wav_fn = item.get('wav_fn')
+        wav, mel = cls.process_audio(wav_fn, item, binarization_args)
         item_name = item['item_name']
         wav_fn = item['wav_fn']
         wav, mel = cls.process_audio(wav_fn, item, binarization_args)
@@ -382,7 +394,7 @@ class TCBinarizer(SingingBinarizer):
         return item
     
     @staticmethod
-    def process_align(ph_durs, mel, item, hop_size=hparams['hop_size'], audio_sample_rate=hparams['audio_sample_rate']):
+    def process_align(ph_durs, mel, item, hop_size=256, audio_sample_rate=48000):
         mel2ph = np.zeros([mel.shape[0]], int)
         startTime = 0
 

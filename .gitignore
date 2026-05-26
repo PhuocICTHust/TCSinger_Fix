@@ -1,0 +1,16 @@
+# Bỏ qua thư mục dữ liệu và bộ nhớ mô hình
+checkpoints/
+data/
+raw_data/
+du_lieu_tho/
+
+# Bỏ qua thư mục môi trường ảo và rác của Python
+__pycache__/
+*.pyc
+.env
+venv/
+env/
+
+# Bỏ qua các file cấu hình hệ điều hành
+.DS_Store
+Thumbs.db

@@ -71,6 +71,18 @@ class TCSinger(FastSpeech):
         # content
         encoder_out = self.encoder(txt_tokens)  # [B, T, C]
         note_out = self.note_encoder(note, note_dur, note_type)
+        # Tự động cân bằng độ dài giữa Text và Note
+        target_len = encoder_out.shape[1]
+        current_len = note_out.shape[1]
+
+        if current_len < target_len:
+            import torch.nn.functional as F
+            # Nếu nốt nhạc ngắn hơn, đệm thêm số 0 vào cuối
+            note_out = F.pad(note_out, (0, 0, 0, target_len - current_len))
+        elif current_len > target_len:
+            # Nếu nốt nhạc dài hơn, cắt bỏ phần thừa ở cuối
+            note_out = note_out[:, :target_len, :]
+
         encoder_out = encoder_out + note_out
         src_nonpadding = (txt_tokens > 0).float()[:, :, None]
         

@@ -8,7 +8,7 @@ vocoder: HifiGAN_NSF
 vocoder_ckpt: checkpoints/hifigan
 use_nsf: true
 
-ds_workers: 2
+ds_workers: 0
 max_input_tokens: 2000
 max_tokens: 12000
 
@@ -74,10 +74,10 @@ num_sanity_val_steps: 0 # steps of validation at the beginning
 
 # dataset split
 valid_prefixes: [
-
+  'bai1_doan2'
 ]
 test_prefixes: [
-
+  'bai1_doan3'
 ]
 
 test_ids: []
