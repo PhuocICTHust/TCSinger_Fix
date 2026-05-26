@@ -8,7 +8,7 @@ vocoder: HifiGAN_NSF
 vocoder_ckpt: checkpoints/hifigan
 use_nsf: true
 
-ds_workers: 0
+ds_workers: 8
 max_input_tokens: 2000
 max_tokens: 12000
 
