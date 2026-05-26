@@ -8,20 +8,21 @@ print("Đang tự động phân chia tập Train / Valid / Test...")
 # 1. Đọc tổng hợp dữ liệu
 meta_path = r'data\processed\tc\metadata.json'
 if not os.path.exists(meta_path):
-    print("Không tìm thấy metadata.json. Hãy chạy prepare_tcsinger_midi... trước!")
+    print("Không tìm thấy metadata.json. Hãy chạy file binarize trước!")
     exit()
 
 with open(meta_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
 
-# Lấy danh sách tên các bài hát duy nhất
+# Lấy danh sách tên các bài hát duy nhất (item_name)
 all_items = list(set([item['item_name'] for item in data]))
 
 # Xáo trộn ngẫu nhiên để chọn công bằng
+random.seed(1234) # Set seed để kết quả ổn định mỗi lần chạy
 random.shuffle(all_items)
 
 total = len(all_items)
-print(f"Tổng số bài hát tìm thấy: {total}")
+print(f"Tổng số dữ liệu (item_name) tìm thấy: {total}")
 
 # 2. Tính toán tỷ lệ (10% Valid, 10% Test)
 num_valid = max(1, int(total * 0.1))
@@ -41,18 +42,24 @@ yaml_path = r"egs\tcsinger.yaml"
 with open(yaml_path, 'r', encoding='utf-8') as f:
     content = f.read()
 
-# Chuyển list Python thành chuỗi mảng YAML (đổi nháy đơn thành nháy kép)
-str_valid = str(valid_list).replace("'", '"')
-str_test = str(test_list).replace("'", '"')
+# Hàm format list thành chuẩn YAML (mỗi item 1 dòng)
+def format_yaml_list(lst):
+    if not lst:
+        return "[]"
+    items_str = ",\n  ".join([f"'{x}'" for x in lst])
+    return f"[\n  {items_str}\n]"
 
-# Dùng Regex tìm và thay thế chính xác dòng cấu hình
-content = re.sub(r"valid_prefixes:\s*\[.*?\]", f"valid_prefixes: {str_valid}", content)
-content = re.sub(r"test_prefixes:\s*\[.*?\]", f"test_prefixes: {str_test}", content)
+str_valid = format_yaml_list(valid_list)
+str_test = format_yaml_list(test_list)
+
+# Dùng Regex với cờ re.DOTALL để quét qua cả các dấu xuống dòng \n
+content = re.sub(r"valid_prefixes:\s*\[.*?\]", f"valid_prefixes: {str_valid}", content, flags=re.DOTALL)
+content = re.sub(r"test_prefixes:\s*\[.*?\]", f"test_prefixes: {str_test}", content, flags=re.DOTALL)
 
 with open(yaml_path, 'w', encoding='utf-8') as f:
     f.write(content)
 
 print(f"[THÀNH CÔNG] Đã chia tự động và cập nhật tcsinger.yaml!")
-print(f" - Tập Valid: {valid_list}")
-print(f" - Tập Test : {test_list}")
-print(f" - Tập Train: Các bài còn lại.")
+print(f" - Tập Valid ({len(valid_list)} bài): {valid_list}")
+print(f" - Tập Test  ({len(test_list)} bài): {test_list}")
+print(f" - Tập Train : Các bài còn lại.")

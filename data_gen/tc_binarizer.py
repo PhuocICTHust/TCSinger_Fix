@@ -245,9 +245,13 @@ class SingingBinarizer(BaseBinarizer):
 
     def split_train_test_set(self, item_names):
         item_names = deepcopy(item_names)
-        test_item_names = [x for x in item_names if any([ts in x for ts in hparams['test_prefixes']])]
-        valid_item_names = [x for x in item_names if any([ts in x for ts in hparams['valid_prefixes']])]
-        train_item_names = [x for x in item_names if x not in set(test_item_names)]
+        # SỬA `ts in x` THÀNH `ts == x`
+        test_item_names = [x for x in item_names if any([ts == x for ts in hparams['test_prefixes']])]
+        valid_item_names = [x for x in item_names if any([ts == x for ts in hparams['valid_prefixes']])]
+
+        # Đảm bảo train không bị trùng lặp
+        train_item_names = [x for x in item_names if x not in set(test_item_names) and x not in set(valid_item_names)]
+
         logging.info("train {}".format(len(train_item_names)))
         logging.info("valid {}".format(len(valid_item_names)))
         logging.info("test {}".format(len(test_item_names)))
@@ -338,8 +342,12 @@ class SingingBinarizer(BaseBinarizer):
     
 # technique f0 midi spk mel style
 class TCBinarizer(SingingBinarizer):
-    ph_encoder = build_token_encoder(r"E:\TCSinger\data\processed\tc\phone_set.json")
-    spker_map = json.load(open(r"E:\TCSinger\data\processed\tc\spker_set.json", encoding='utf-8'))
+    # Sử dụng os.path.join để xây dựng đường dẫn an toàn trên mọi hệ điều hành
+    # Và dùng biến môi trường HOME để không bị phụ thuộc vào tên user
+    base_dir = os.path.join(os.environ.get('HOME', '/home/user14'), 'phuocpd/TCSinger')
+
+    ph_encoder = build_token_encoder(os.path.join(base_dir, "data/processed/tc/phone_set.json"))
+    spker_map = json.load(open(os.path.join(base_dir, "data/processed/tc/spker_set.json"), encoding='utf-8'))
     @classmethod
     def process_item(cls, item, binarization_args):
         hparams['fft_size'] = 1024
@@ -357,7 +365,7 @@ class TCBinarizer(SingingBinarizer):
         item_name = item['item_name']
         wav_fn = item['wav_fn']
         wav, mel = cls.process_audio(wav_fn, item, binarization_args)
-        
+
         item["ph_token"] = cls.ph_encoder.encode(' '.join(item["ph"]))
         item["spk_id"] = cls.spker_map[item["singer"]]
         item['txt']=" ".join(item['txt'])
